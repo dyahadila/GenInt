@@ -3,3 +3,4 @@ dataset
 .idea
 IntervenedGAN/models/checkpoints/
 IntervenedGAN/__pycache__/
+env
