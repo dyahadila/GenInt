@@ -1,5 +1,4 @@
 import os
-
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
 
@@ -7,6 +6,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets
 
 import torch
+import numpy as np
 
 trainloader = DataLoader(
         datasets.MNIST(
@@ -40,13 +40,13 @@ testloader = DataLoader(
         shuffle=True,
     )
 
-color_mnist_train_path = '/proj/vondrick/datasets/color_MNIST/train/' 
-color_mnist_test_path = '/proj/vondrick/datasets/color_MNIST/test/' 
-color_mnist_confound_test_path = '/proj/vondrick/datasets/color_MNIST/confound_test/' 
+color_mnist_train_path = '/nobackup/dyah_roopa/color_MNIST/train/'
+color_mnist_test_path = '/nobackup/dyah_roopa/color_MNIST/test/'
+color_mnist_confound_test_path = '/nobackup/dyah_roopa/color_MNIST/confound_test/'
 
 
 def color_set1(imgs, labels):
-	imgs[labels==0,0,:,:] = torch.ones_like(imgs[labels==0,0,:,:])
+    imgs[labels==0,0,:,:] = torch.ones_like(imgs[labels==0,0,:,:])
     imgs[labels==0,1,:,:] = torch.ones_like(imgs[labels==0,1,:,:])
 
     imgs[labels==1,1,:,:] = torch.ones_like(imgs[labels==1,1,:,:])
@@ -68,7 +68,7 @@ def color_set1(imgs, labels):
     imgs[labels==7,2,:,:] = torch.zeros_like(imgs[labels==7,2,:,:])
 
     imgs[labels==8,2,:,:] = torch.zeros_like(imgs[labels==8,2,:,:])
-    imgs[labels==8,0,:,:] = torch.zeros_like(imgs[labels==8,0,:,:])            
+    imgs[labels==8,0,:,:] = torch.zeros_like(imgs[labels==8,0,:,:])
 
     imgs[labels==9,1,:,:] = torch.zeros_like(imgs[labels==9,1,:,:])
 
@@ -76,7 +76,7 @@ def color_set1(imgs, labels):
 
 
 def color_set2(imgs, labels):
-	imgs[labels==5,0,:,:] = torch.ones_like(imgs[labels==5,0,:,:])
+    imgs[labels==5,0,:,:] = torch.ones_like(imgs[labels==5,0,:,:])
     imgs[labels==5,1,:,:] = torch.zeros_like(imgs[labels==5,1,:,:])
 
     imgs[labels==3,1,:,:] = torch.ones_like(imgs[labels==3,1,:,:])
@@ -98,7 +98,7 @@ def color_set2(imgs, labels):
     imgs[labels==7,2,:,:] = torch.ones_like(imgs[labels==7,2,:,:])
 
     imgs[labels==8,2,:,:] = torch.zeros_like(imgs[labels==8,2,:,:])
-    imgs[labels==8,0,:,:] = torch.ones_like(imgs[labels==8,0,:,:])            
+    imgs[labels==8,0,:,:] = torch.ones_like(imgs[labels==8,0,:,:])
 
     imgs[labels==9,1,:,:] = torch.ones_like(imgs[labels==9,1,:,:])
 
@@ -108,40 +108,41 @@ def color_set2(imgs, labels):
 for i in range(10):
     os.makedirs(color_mnist_train_path+str(i), exist_ok=True)
     os.makedirs(color_mnist_test_path+str(i), exist_ok=True)
+    os.makedirs(color_mnist_confound_test_path + str(i), exist_ok=True)
     
 
-print("Generate Trainset")
-e1 = True
-for batch_idx, (imgs, labels) in enumerate((trainloader)):
-    if e1:
-        imgs = color_set1(imgs, labels)
-        e1 = not e1
-        
-    else:
-        imgs = color_set1(imgs, labels)
-        e1 = not e1
-        
-        for digit in range(10):
-            for i in range(imgs[labels==digit].size(0)):
-                torchvision.utils.save_image(imgs[labels==digit][i, :, :, :], 
-                                             color_mnist_train_path+str(digit)+'/{}.png'.format(batch_idx*128+i), 
-                                             normalize=True)
+# print("Generate Trainset")
+# e1 = True
+# for batch_idx, (imgs, labels) in enumerate((trainloader)):
+#     if e1:
+#         imgs = color_set1(imgs, labels)
+#         e1 = not e1
+#
+#     else:
+#         imgs = color_set1(imgs, labels)
+#         e1 = not e1
+#
+#         for digit in range(10):
+#             for i in range(imgs[labels==digit].size(0)):
+#                 save_image(imgs[labels==digit][i, :, :, :],
+#                                              color_mnist_train_path+str(digit)+'/{}.png'.format(batch_idx*128+i),
+#                                              normalize=True)
 
-print("Generate Testset")
-for batch_idx, (test_imgs, test_labels) in enumerate(testloader):
-    channel = np.random.choice(3,2)
-    color = np.random.sample([3])>0.5
-    for ch in channel:
-        if color[ch]:
-            test_imgs[:,ch,:,:] = torch.ones_like(test_imgs[:,ch,:,:])            
-        else:
-            test_imgs[:,ch,:,:] = torch.zeros_like(test_imgs[:,ch,:,:])
-                
-    for digit in range(10):
-        for i in range(test_imgs[test_labels==digit].size(0)):
-            torchvision.utils.save_image(test_imgs[test_labels==digit][i, :, :, :], 
-                                         color_mnist_test_path+str(digit)+'/{}.png'.format(batch_idx*128+i), 
-                                         normalize=True)
+# print("Generate Testset")
+# for batch_idx, (test_imgs, test_labels) in enumerate(testloader):
+#     channel = np.random.choice(3,2)
+#     color = np.random.sample([3])>0.5
+#     for ch in channel:
+#         if color[ch]:
+#             test_imgs[:,ch,:,:] = torch.ones_like(test_imgs[:,ch,:,:])
+#         else:
+#             test_imgs[:,ch,:,:] = torch.zeros_like(test_imgs[:,ch,:,:])
+#
+#     for digit in range(10):
+#         for i in range(test_imgs[test_labels==digit].size(0)):
+#             save_image(test_imgs[test_labels==digit][i, :, :, :],
+#                                          color_mnist_test_path+str(digit)+'/{}.png'.format(batch_idx*128+i),
+#                                          normalize=True)
 
 print("Generate Confound Testset")
 e1 = True
@@ -156,6 +157,6 @@ for batch_idx, (imgs, labels) in enumerate((testloader)):
         
         for digit in range(10):
             for i in range(imgs[labels==digit].size(0)):
-                torchvision.utils.save_image(imgs[labels==digit][i, :, :, :], 
+                save_image(imgs[labels==digit][i, :, :, :],
                                              color_mnist_confound_test_path+str(digit)+'/{}.png'.format(batch_idx*128+i), 
                                              normalize=True)

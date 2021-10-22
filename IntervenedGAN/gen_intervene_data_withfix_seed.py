@@ -82,8 +82,8 @@ if __name__ == '__main__':
     else:
         output_dir = '{}/x-z_tr{}-imgnet-rand{}-int5time'.format(root_path, args.truncation, args.random_num_end)
 
-    print("Info: random z from {} to {} \n    component from {} to {}, \n random offset {}  ".format(
-        args.random_num_start, args.random_num_end, args.start_component, args.end_component, args.num_rand_scale))
+    print("Info: random z from {} to {}".format(
+        args.random_num_start, args.random_num_end))
     print("truncation {}".format(args.truncation))
 
 

@@ -6,7 +6,7 @@ from torch import nn, optim
 from torch.nn import functional as F
 from torchvision import datasets, transforms
 from torchvision.utils import save_image
-from tqdm import trange
+from tqdm import tqdm
 
 import os
 
@@ -19,8 +19,8 @@ torch.manual_seed(1)
 
 device = torch.device("cuda")
 
-train_path='/proj/vondrick/datasets/color_MNIST/train'
-test_path= '/proj/vondrick/datasets/color_MNIST/test'
+train_path= '/nobackup/dyah_roopa/color_MNIST/train/'
+test_path= '/nobackup/dyah_roopa/color_MNIST/test/'
 
 composed_transforms = transforms.Compose([
                 transforms.ToTensor(),
@@ -96,7 +96,7 @@ def loss_function(recon_x, x, mu, logvar):
 def train(epoch):
     model.train()
     train_loss = 0
-    for batch_idx, (data, target) in enumerate(train_loader):
+    for batch_idx, (data, target) in enumerate(tqdm(train_loader)):
         # print("target", target)
         # print(data.shape)
         # exit(0)
@@ -147,13 +147,15 @@ vis_width=77
 
     
 for epoch in range(1, epochs + 1):
+    print("Begin Training...")
     train(epoch)
+    print("Begin Testing...")
     test(epoch)
 
 
 print("Generate cVAE Intervened Training Set")
 
-color_mnist_intervene_path = '/proj/vondrick/datasets/color_MNIST/intervene_train/'
+color_mnist_intervene_path = '/nobackup/dyah_roopa/color_MNIST/intervene_train/'
 
 for i in range(10):
     os.makedirs(color_mnist_intervene_path+str(i), exist_ok=True)
@@ -170,11 +172,11 @@ for digit in range(10):
         target = target.to(device)
         sample = model.decode(sample, target).cpu()
 
-        sample = torch.randn(64, 20).to(device)
-        sample = model.decode(sample).cpu()
+        # sample = torch.randn(64, 20).to(device)
+        # sample = model.decode(sample).cpu()
         sample = sample.view(vis_width**2, 3, 32, 32)
 
         for i in range(sample.size(0)):
-            torchvision.utils.save_image(sample[i, :, :, :], 
+            save_image(sample[i, :, :, :],
                                              color_mnist_intervene_path+str(digit)+'/{}.png'.format(i), 
                                              normalize=True)

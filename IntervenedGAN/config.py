@@ -75,6 +75,12 @@ class Config:
         parser.add_argument('--allrand', type=int, default=0, help='num of transformations selected')
         parser.add_argument('--save_simple', type=int, default=0, help='do not save hirerarchy of images')
         parser.add_argument('--save_noise', type=int, default=0, help='save noise for generating that image')
+        parser.add_argument('--truncation', type=float, default=0, help='truncation added roopa')
+        parser.add_argument('--random_num_start', type=int, default=0, help='random_num_start added roopa')
+        parser.add_argument('--random_num_end', type=int, default=0, help='random_num_end added roopa')
+        parser.add_argument('--global_seed', type=int, default=0, help='global_seed added roopa')
+        parser.add_argument('--class_start', type=int, default=0, help='class_start added roopa')
+        parser.add_argument('--class_end', type=int, default=0, help='class_end added roopa')
         args = parser.parse_args(args)
 
         return self.from_dict(args.__dict__)

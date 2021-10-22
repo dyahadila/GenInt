@@ -7,7 +7,8 @@ from pathlib import Path
 
 current_path = os.getcwd()
 
-module_path = Path(__file__).parent / 'stylegan2-pytorch'
+#module_path = Path(__file__).parent / 'stylegan2-pytorch'
+module_path = Path(__file__).parent
 sys.path.append(str(module_path.resolve()))
 os.chdir(module_path)
 
