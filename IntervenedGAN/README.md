@@ -10,7 +10,7 @@
 See the [setup instructions](SETUP.md).
 
 ## Generate Interventional GAN data
-* to generated the interventional GAN data, run `CUDA_VISIBLE_DEVICES=0 python gen_intervene_data_withfix_seed.py  --model=BigGAN-256 --class=husky --layer=generator.gen_z -n=1000000\
+* to generated the interventional GAN data, run `CUDA_VISIBLE_DEVICES=0 python gen_intervene_data_withfix_seed.py  --model=BigGAN-256 --class=husky --layer=generator.gen_z -n=1000000
  --truncation 1.0 --random_num_start 0 --random_num_end 1000 --global_seed 10319 --class_start 0 --class_end 1000`
 
 * to generated transferred intervention, run `CUDA_VISIBLE_DEVICES=0 python style_transfer_int2imgnet.py`, you can specify the starting
