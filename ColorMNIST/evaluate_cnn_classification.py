@@ -13,6 +13,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
+from tqdm import tqdm
+
 img_shape = (3, 32, 32)
 
 # Parameters
@@ -57,7 +59,7 @@ def fit(model, train_loader):
     EPOCHS = 5
     BATCH_SIZE = 64
     model.train()
-    for epoch in range(EPOCHS):
+    for epoch in tqdm(range(EPOCHS)):
         correct = 0
         for batch_idx, (imgs, labels) in enumerate(train_loader):
     
@@ -132,7 +134,7 @@ def accuracy(output, target, topk=(1,)):
 
         res = []
         for k in topk:
-            correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
+            correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
             res.append(correct_k)
         return res
                 
@@ -167,10 +169,10 @@ def evaluate(model, test_loader):
 #         return min(len(d) for d in self.datasets)
 
 
-color_mnist_test = '/proj/vondrick/datasets/color_MNIST/test/'
-color_mnist_confound_test = '/proj/vondrick/datasets/color_MNIST/confound_test/'
-color_mnist_train = '/proj/vondrick/datasets/color_MNIST/train/'
-color_mnist_train_intervened = '/proj/vondrick/datasets/color_MNIST/intervene_train/'
+color_mnist_test = '/nobackup/dyah_roopa/color_MNIST/test/'
+color_mnist_confound_test = '/nobackup/dyah_roopa/color_MNIST/confound_test/'
+color_mnist_train = '/nobackup/dyah_roopa/color_MNIST/train/'
+color_mnist_train_intervened = '/nobackup/dyah_roopa/color_MNIST/intervene_train/'
 
 
 batch_size = 64
@@ -181,13 +183,13 @@ composed_transforms = transforms.Compose([
                     ])
 
 test_set = datasets.ImageFolder(color_mnist_test, composed_transforms)
-confound_test_set = datasets.ImageFolder(confound_test_set, composed_transforms)
+confound_test_set = datasets.ImageFolder(color_mnist_confound_test, composed_transforms)
 color_mnist_train_set = datasets.ImageFolder(color_mnist_train, composed_transforms)
 color_mnist_train_intervened_set = datasets.ImageFolder(color_mnist_train_intervened, composed_transforms)
 
 
 testloader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=True)
-confound_testloader = torch.utils.data.DataLoader(confound_test_set, batch_size=batch_size, shuffle=True)
+confound_testloader = torch.utils.data.DataLoader(color_mnist_confound_test, batch_size=batch_size, shuffle=True)
 
 color_mnist_trainloader = torch.utils.data.DataLoader(
                                                         color_mnist_train_set, 
