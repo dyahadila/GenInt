@@ -4,3 +4,4 @@ dataset
 IntervenedGAN/models/checkpoints/
 IntervenedGAN/__pycache__/
 env
+netdissect/__pycache__/

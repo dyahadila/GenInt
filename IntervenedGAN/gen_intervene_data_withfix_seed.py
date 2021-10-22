@@ -74,7 +74,7 @@ if __name__ == '__main__':
     import socket
     debug = False
 
-    root_path = "/path you want to save to"
+    root_path = "/nobackup/dyah_roopa/intervened_gan"
 
     # create data pair :  z noise, img generated
     if obj_only:
