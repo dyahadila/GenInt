@@ -158,7 +158,7 @@ for i in range(2):
     os.makedirs(color_mnist_intervene_path+str(i), exist_ok=True)
 
 
-for digit in range():
+for digit in range(2):
     with torch.no_grad():
         epsilon = norm.ppf(np.linspace(0, 1, vis_width + 2)[1:-1])
         sample = np.dstack(np.meshgrid(epsilon, -epsilon)).reshape(-1, 2)
