@@ -19,7 +19,8 @@ torch.manual_seed(1)
 
 device = torch.device("cuda")
 
-train_path= '/nobackup/dyah_roopa/color_MNIST/train/'
+train_path= '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/train_0.25/'
+# train_path='/nobackup/dyah_roopa/color_MNIST/train/'
 test_path= '/nobackup/dyah_roopa/color_MNIST/test/'
 
 composed_transforms = transforms.Compose([
@@ -40,7 +41,7 @@ test_loader = torch.utils.data.DataLoader(
         test_dataset, batch_size=batch_size, shuffle=None,
         num_workers=workers, pin_memory=True, sampler=None)
 
-in_dim = 32**2 *3
+in_dim =32**2 *3
 emb_dim=5
 hidden_dim=1000
 z_hidden = 2
@@ -97,10 +98,6 @@ def train(epoch):
     model.train()
     train_loss = 0
     for batch_idx, (data, target) in enumerate(tqdm(train_loader)):
-        # print("target", target)
-        # print(data.shape)
-        # exit(0)
-
         data = data.to(device)
         target = target.to(device)
         optimizer.zero_grad()
@@ -149,19 +146,19 @@ vis_width=77
 for epoch in range(1, epochs + 1):
     print("Begin Training...")
     train(epoch)
-    print("Begin Testing...")
-    test(epoch)
+    # print("Begin Testing...")
+    # test(epoch)
 
 
 print("Generate cVAE Intervened Training Set")
 
-color_mnist_intervene_path = '/nobackup/dyah_roopa/color_MNIST/intervene_train/'
+color_mnist_intervene_path = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/intervened_train_0.25'
 
-for i in range(10):
+for i in range(2):
     os.makedirs(color_mnist_intervene_path+str(i), exist_ok=True)
 
 
-for digit in range(10):
+for digit in range():
     with torch.no_grad():
         epsilon = norm.ppf(np.linspace(0, 1, vis_width + 2)[1:-1])
         sample = np.dstack(np.meshgrid(epsilon, -epsilon)).reshape(-1, 2)
