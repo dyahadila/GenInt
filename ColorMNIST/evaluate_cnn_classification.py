@@ -21,7 +21,7 @@ img_shape = (3, 32, 32)
 image_size = 32
 label_dim = 10
 
-learning_rate = 0.0002
+learning_rate = 0.00002
 betas = (0.5, 0.999)
 batch_size = 2048
 num_epochs = 20
@@ -169,10 +169,11 @@ def evaluate(model, test_loader):
 #         return min(len(d) for d in self.datasets)
 
 
-color_mnist_test = '/nobackup/dyah_roopa/color_MNIST/test/'
-color_mnist_confound_test = '/nobackup/dyah_roopa/color_MNIST/confound_test/'
-color_mnist_train = '/nobackup/dyah_roopa/color_MNIST/train/'
-color_mnist_train_intervened = '/nobackup/dyah_roopa/color_MNIST/intervene_train/'
+color_mnist_test_indist = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/test_0.25/in_dist/'
+color_mnist_test_ood = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/test_0.25/ood/'
+# color_mnist_confound_test = '/nobackup/dyah_roopa/color_MNIST/confound_test/'
+color_mnist_train = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/train_0.25/'
+color_mnist_train_intervened = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/intervened_train_0.25/'
 
 
 batch_size = 64
@@ -182,14 +183,16 @@ composed_transforms = transforms.Compose([
                         transforms.ToTensor(), 
                     ])
 
-test_set = datasets.ImageFolder(color_mnist_test, composed_transforms)
-confound_test_set = datasets.ImageFolder(color_mnist_confound_test, composed_transforms)
+test_set_indist = datasets.ImageFolder(color_mnist_test_indist, composed_transforms)
+test_set_ood = datasets.ImageFolder(color_mnist_test_ood, composed_transforms)
+# confound_test_set = datasets.ImageFolder(color_mnist_confound_test, composed_transforms)
 color_mnist_train_set = datasets.ImageFolder(color_mnist_train, composed_transforms)
 color_mnist_train_intervened_set = datasets.ImageFolder(color_mnist_train_intervened, composed_transforms)
 
 
-testloader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=True)
-confound_testloader = torch.utils.data.DataLoader(color_mnist_confound_test, batch_size=batch_size, shuffle=True)
+testloader_indist = torch.utils.data.DataLoader(test_set_indist, batch_size=batch_size, shuffle=True)
+testloader_ood = torch.utils.data.DataLoader(test_set_ood, batch_size=batch_size, shuffle=True)
+# confound_testloader = torch.utils.data.DataLoader(color_mnist_confound_test, batch_size=batch_size, shuffle=True)
 
 color_mnist_trainloader = torch.utils.data.DataLoader(
                                                         color_mnist_train_set, 
@@ -210,7 +213,13 @@ cnn_intervened = cnn_intervened.cuda()
 fit(cnn_intervened, intervened_trainloader)
 
 print("baseline")
-evaluate(cnn_baseline, testloader)
+print("in-distribution")
+evaluate(cnn_baseline, testloader_indist)
+print("ood")
+evaluate(cnn_baseline, testloader_ood)
 
 print("intervened")
-evaluate(cnn_baseline, testloader)
+print("in-distribution")
+evaluate(cnn_intervened, testloader_indist)
+print("ood")
+evaluate(cnn_intervened, testloader_ood)

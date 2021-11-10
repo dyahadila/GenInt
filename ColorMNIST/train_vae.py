@@ -152,7 +152,7 @@ for epoch in range(1, epochs + 1):
 
 print("Generate cVAE Intervened Training Set")
 
-color_mnist_intervene_path = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/intervened_train_0.25'
+color_mnist_intervene_path = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/intervened_train'
 
 for i in range(2):
     os.makedirs(color_mnist_intervene_path+str(i), exist_ok=True)
