@@ -3,24 +3,14 @@ os.environ['FOR_DISABLE_CONSOLE_CTRL_HANDLER'] = '1'
 
 import torch, json, numpy as np
 from types import SimpleNamespace
-import matplotlib.pyplot as plt
 from pathlib import Path
 from os import makedirs
-from PIL import Image
-from netdissect import proggan, nethook, easydict, zdataset
-from netdissect.modelconfig import create_instrumented_model
 from estimators import get_estimator
 from models import get_instrumented_model
-from scipy.cluster.vq import kmeans
-import re
-import sys
 import datetime
-import argparse
-from tqdm import trange
 from tqdm import tqdm
 from config import Config
 from decomposition import get_random_dirs, get_or_compute, get_max_batch_size, SEED_VISUALIZATION
-from utils import pad_frames
 
 from utils import getDictImageNetClasses, get_imagenet_overlap
 
@@ -41,7 +31,6 @@ if __name__ == '__main__':
         num2id[ii] = each
 
     obj_only=False
-
     # Load Objectnet classes:
     overlapping_list, non_overlapping = get_imagenet_overlap()
 
@@ -74,7 +63,7 @@ if __name__ == '__main__':
     import socket
     debug = False
 
-    root_path = "/nobackup/dyah_roopa/intervened_gan"
+    root_path = "/nobackup/dyah_roopa/intervened_gan_ColorMNIST"
 
     # create data pair :  z noise, img generated
     if obj_only:
@@ -102,7 +91,7 @@ if __name__ == '__main__':
     # Shape of sample passed to PCA
     sample_shape = feature_shape * axis_mask
     sample_shape[sample_shape == 0] = 1
-
+    breakpoint()
     # Load or compute components
     dump_name = get_or_compute(args, inst)
     data = np.load(dump_name, allow_pickle=False)  # does not contain object arrays
