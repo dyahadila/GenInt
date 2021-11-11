@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-colormnist_dir = "/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/r_0.25"
+colormnist_dir = "/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/r_0.25"
 label_file = "targets.npy"
 
 in_dist = {'file': [], 'label': []}

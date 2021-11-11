@@ -2,11 +2,11 @@ import os
 import shutil
 import pandas as pd
 
-train_file = "/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/r_0.25/train.csv"
-test_file = "/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/r_0.25/test.csv"
+train_file = "/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/r_0.25/train.csv"
+test_file = "/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/r_0.25/test.csv"
 
-target_train = "/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/train_0.25"
-target_test = "/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/test_0.25"
+target_train = "/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/train_0.25"
+target_test = "/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/test_0.25"
 
 if not os.path.isdir(target_train):
     os.mkdir(target_train)

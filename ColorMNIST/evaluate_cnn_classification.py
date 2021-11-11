@@ -169,11 +169,13 @@ def evaluate(model, test_loader):
 #         return min(len(d) for d in self.datasets)
 
 
-color_mnist_test_indist = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/test_0.25/in_dist/'
-color_mnist_test_ood = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/test_0.25/ood/'
+color_mnist_test_indist = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/test_0.25/in_dist/'
+color_mnist_test_ood = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/test_0.25/ood/'
+color_mnist_test_spurious_ood = '/nobackup/dyah_roopa/temp/Spurious_OOD/datasets/ood_datasets/partial_color_mnist_0&1/'
+
 # color_mnist_confound_test = '/nobackup/dyah_roopa/color_MNIST/confound_test/'
-color_mnist_train = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/train_0.25/'
-color_mnist_train_intervened = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/intervened_train_0.25/'
+color_mnist_train = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/train_0.25/'
+color_mnist_train_intervened = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/intervened_train_0.25/'
 
 
 batch_size = 64
@@ -185,6 +187,7 @@ composed_transforms = transforms.Compose([
 
 test_set_indist = datasets.ImageFolder(color_mnist_test_indist, composed_transforms)
 test_set_ood = datasets.ImageFolder(color_mnist_test_ood, composed_transforms)
+test_set_spurious_ood = datasets.ImageFolder(color_mnist_test_spurious_ood, composed_transforms)
 # confound_test_set = datasets.ImageFolder(color_mnist_confound_test, composed_transforms)
 color_mnist_train_set = datasets.ImageFolder(color_mnist_train, composed_transforms)
 color_mnist_train_intervened_set = datasets.ImageFolder(color_mnist_train_intervened, composed_transforms)
@@ -192,6 +195,7 @@ color_mnist_train_intervened_set = datasets.ImageFolder(color_mnist_train_interv
 
 testloader_indist = torch.utils.data.DataLoader(test_set_indist, batch_size=batch_size, shuffle=True)
 testloader_ood = torch.utils.data.DataLoader(test_set_ood, batch_size=batch_size, shuffle=True)
+testloader_spurious_ood = torch.utils.data.DataLoader(test_set_spurious_ood, batch_size=batch_size, shuffle=True)
 # confound_testloader = torch.utils.data.DataLoader(color_mnist_confound_test, batch_size=batch_size, shuffle=True)
 
 color_mnist_trainloader = torch.utils.data.DataLoader(
@@ -217,9 +221,13 @@ print("in-distribution")
 evaluate(cnn_baseline, testloader_indist)
 print("ood")
 evaluate(cnn_baseline, testloader_ood)
+print("spurious ood")
+evaluate(cnn_baseline, testloader_spurious_ood)
 
 print("intervened")
 print("in-distribution")
 evaluate(cnn_intervened, testloader_indist)
 print("ood")
 evaluate(cnn_intervened, testloader_ood)
+print("spurious ood")
+evaluate(cnn_intervened, testloader_spurious_ood)

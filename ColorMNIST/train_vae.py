@@ -19,7 +19,7 @@ torch.manual_seed(1)
 
 device = torch.device("cuda")
 
-train_path= '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/train_0.25/'
+train_path= '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/train_0.25/'
 # train_path='/nobackup/dyah_roopa/color_MNIST/train/'
 test_path= '/nobackup/dyah_roopa/color_MNIST/test/'
 
@@ -41,7 +41,7 @@ test_loader = torch.utils.data.DataLoader(
         test_dataset, batch_size=batch_size, shuffle=None,
         num_workers=workers, pin_memory=True, sampler=None)
 
-in_dim =32**2 *3
+in_dim =28**2 *3
 emb_dim=5
 hidden_dim=1000
 z_hidden = 2
@@ -128,7 +128,7 @@ def test(epoch):
             if i == 0:
                 n = min(data.size(0), 8)
                 comparison = torch.cat([data[:n],
-                                      recon_batch.view(batch_size, 3, 32, 32)[:n]])
+                                      recon_batch.view(batch_size, 3, 28, 28)[:n]])
                 save_image(comparison.cpu(),
                          './' + str(epoch) + '.png', nrow=n)
 
@@ -152,7 +152,7 @@ for epoch in range(1, epochs + 1):
 
 print("Generate cVAE Intervened Training Set")
 
-color_mnist_intervene_path = '/nobackup/dyah_roopa/VAE_ColorMNIST_upsampled/color_MNIST_1/intervened_train'
+color_mnist_intervene_path = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/intervened_train'
 
 for i in range(2):
     os.makedirs(color_mnist_intervene_path+str(i), exist_ok=True)
@@ -171,7 +171,7 @@ for digit in range(2):
 
         # sample = torch.randn(64, 20).to(device)
         # sample = model.decode(sample).cpu()
-        sample = sample.view(vis_width**2, 3, 32, 32)
+        sample = sample.view(vis_width**2, 3, 28, 28)
 
         for i in range(sample.size(0)):
             save_image(sample[i, :, :, :],
