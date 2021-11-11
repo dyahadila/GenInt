@@ -26,6 +26,8 @@ betas = (0.5, 0.999)
 batch_size = 2048
 num_epochs = 20
 
+BATCH_SIZE = 64
+
 cuda = True if torch.cuda.is_available() else False
 
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
@@ -38,7 +40,7 @@ class CNN(nn.Module):
         self.conv2 = nn.Conv2d(32, 32, kernel_size=5)
         self.conv3 = nn.Conv2d(32,64, kernel_size=5)
         self.fc1 = nn.Linear(1024, 256)
-        self.fc2 = nn.Linear(256, 10)
+        self.fc2 = nn.Linear(256, 2)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -57,7 +59,6 @@ def fit(model, train_loader):
     optimizer = torch.optim.Adam(model.parameters())#,lr=0.001, betas=(0.9,0.999))
     error = nn.CrossEntropyLoss()
     EPOCHS = 5
-    BATCH_SIZE = 64
     model.train()
     for epoch in tqdm(range(EPOCHS)):
         correct = 0
@@ -75,7 +76,7 @@ def fit(model, train_loader):
             predicted = torch.max(output.data, 1)[1] 
             correct += (predicted == var_y_batch).sum()
             #print(correct)
-            if batch_idx % 200 == 0:
+            if batch_idx % 20 == 0:
                 print('Epoch : {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\t Accuracy:{:.3f}%'.format(
                             epoch, 
                             batch_idx*len(imgs), 
@@ -130,32 +131,35 @@ def accuracy(output, target, topk=(1,)):
 
         _, pred = output.topk(maxk, 1, True, True)
         pred = pred.t()
+        # print(target)
+        # print(pred)
         correct = pred.eq(target.view(1, -1).expand_as(pred))
-
+        # print(correct)
         res = []
         for k in topk:
             correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
+            # print(correct_k)
+            # exit()
             res.append(correct_k)
         return res
                 
 def evaluate(model, test_loader):
+    model.eval()
     correct = 0 
-    BATCH_SIZE = 100
     top1 = 0
-    top5 = 0
-    for batch_idx, (test_imgs, test_labels) in enumerate(test_loader):
-        test_imgs = Variable(test_imgs.type(FloatTensor))
-        test_labels = Variable(test_labels.type(LongTensor))
-        output = model(test_imgs)
-#         predicted = torch.max(output,1)[1]
-#         correct += (predicted == test_labels).sum()
-        
-        acc1, acc5 = accuracy(output, test_labels, topk=(1, 5))
-        top1 += acc1
-        top5 += acc5
-        
+    # top5 = 0
+    with torch.no_grad():
+        for batch_idx, (test_imgs, test_labels) in enumerate(test_loader):
+            test_imgs = Variable(test_imgs.type(FloatTensor))
+            test_labels = Variable(test_labels.type(LongTensor))
+            output = model(test_imgs)
+    #         predicted = torch.max(output,1)[1]
+    #         correct += (predicted == test_labels).sum()
+            acc1 = accuracy(output, test_labels)
+            # print(acc1)
+            top1 += acc1[0]
     print("Test accuracy top1:{:.3f}% ".format( float(top1*100) / (len(test_loader)*BATCH_SIZE)))
-    print("Test accuracy top5:{:.3f}% ".format( float(top5*100) / (len(test_loader)*BATCH_SIZE)))
+    # print("Test accuracy top5:{:.3f}% ".format( float(top5*100) / (len(test_loader)*BATCH_SIZE)))
 
 
 # class ConcatDataset(torch.utils.data.Dataset):
@@ -219,15 +223,15 @@ fit(cnn_intervened, intervened_trainloader)
 print("baseline")
 print("in-distribution")
 evaluate(cnn_baseline, testloader_indist)
-print("ood")
-evaluate(cnn_baseline, testloader_ood)
-print("spurious ood")
-evaluate(cnn_baseline, testloader_spurious_ood)
+# print("ood")
+# evaluate(cnn_baseline, testloader_ood)
+# print("spurious ood")
+# evaluate(cnn_baseline, testloader_spurious_ood)
 
 print("intervened")
 print("in-distribution")
 evaluate(cnn_intervened, testloader_indist)
-print("ood")
-evaluate(cnn_intervened, testloader_ood)
-print("spurious ood")
-evaluate(cnn_intervened, testloader_spurious_ood)
+# print("ood")
+# evaluate(cnn_intervened, testloader_ood)
+# print("spurious ood")
+# evaluate(cnn_intervened, testloader_spurious_ood)
