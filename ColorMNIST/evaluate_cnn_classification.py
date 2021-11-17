@@ -134,9 +134,9 @@ def accuracy(output, target, topk=(1,)):
         _, pred = output.topk(maxk, 1, True, True)
         pred = pred.t()
         # print(target)
-        print(pred)
+        # print(pred)
         correct = pred.eq(target.view(1, -1).expand_as(pred))
-        print(correct)
+        # print(correct)
         res = []
         for k in topk:
             correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
@@ -150,19 +150,21 @@ def evaluate(model, test_loader):
     correct = 0 
     top1 = 0
     # top5 = 0
+    outputs = []
     with torch.no_grad():
         for batch_idx, (test_imgs, test_labels) in enumerate(test_loader):
             test_imgs = Variable(test_imgs.type(FloatTensor))
             test_labels = Variable(test_labels.type(LongTensor))
             output = model(test_imgs)
+            outputs.extend(output.cpu().numpy())
     #         predicted = torch.max(output,1)[1]
     #         correct += (predicted == test_labels).sum()
             acc1 = accuracy(output, test_labels)
-            print(acc1,"---------")
+            # print(acc1,"---------")
             top1 += acc1[0]
     print("Test accuracy top1:{:.3f}% ".format( float(top1*BATCH_SIZE) / (len(test_loader)*BATCH_SIZE)))
     # print("Test accuracy top5:{:.3f}% ".format( float(top5*100) / (len(test_loader)*BATCH_SIZE)))
-    return output, test_labels
+    return np.asarray(outputs), test_labels
 
 def evaluate_ood(model, test_loader):
     model.eval()
@@ -170,35 +172,37 @@ def evaluate_ood(model, test_loader):
     top1 = 0
     # top5 = 0
     threshold = -math.inf
+    outputs = []
     with torch.no_grad():
         for batch_idx, (test_imgs, test_labels) in enumerate(test_loader):
             test_imgs = Variable(test_imgs.type(FloatTensor))
             test_labels = Variable(test_labels.type(LongTensor))
             output = model(test_imgs)
-            out_list = output.tolist()
-            labels_list = test_labels.tolist()
-            output_filtered = []
-            labels_filtered = []
-            count = 0
-            for x in out_list:
-                if x[0] > threshold and x[1] > threshold:
-                    output_filtered.append(x)
-                    labels_filtered.append(labels_list[count])
-                count += 1
-            #print(output_filtered)
-            #print(labels_filtered)
-            if len(output_filtered) == 0:
-                continue
-            out_filtered_tensor = torch.FloatTensor(output_filtered)
-            labels_filtered_tensor = torch.FloatTensor(labels_filtered)
+            outputs.extend(output.cpu().numpy())
+            # out_list = output.tolist()
+            # labels_list = test_labels.tolist()
+            # output_filtered = []
+            # labels_filtered = []
+            # count = 0
+            # for x in out_list:
+            #     if x[0] > threshold and x[1] > threshold:
+            #         output_filtered.append(x)
+            #         labels_filtered.append(labels_list[count])
+            #     count += 1
+            # #print(output_filtered)
+            # #print(labels_filtered)
+            # if len(output_filtered) == 0:
+            #     continue
+            # out_filtered_tensor = torch.FloatTensor(output_filtered)
+            # labels_filtered_tensor = torch.FloatTensor(labels_filtered)
     #         predicted = torch.max(output,1)[1]
     #         correct += (predicted == test_labels).sum()
-            acc1 = accuracy(out_filtered_tensor, labels_filtered_tensor)
+            acc1 = accuracy(output, test_labels)
             print(acc1)
             top1 += acc1[0]
     print("Test accuracy top1:{:.3f}% ".format( float(top1*BATCH_SIZE) / (len(test_loader)*BATCH_SIZE)))
     # print("Test accuracy top5:{:.3f}% ".format( float(top5*100) / (len(test_loader)*BATCH_SIZE)))
-    return output,test_labels
+    return np.asarray(outputs),test_labels
 
 # class ConcatDataset(torch.utils.data.Dataset):
 #     def __init__(self, *datasets):
@@ -261,10 +265,12 @@ fit(cnn_intervened, intervened_trainloader)
 print("baseline")
 #print("in-distribution")
 in_pred, in_actual = evaluate(cnn_baseline, testloader_indist)
-in_pred = in_pred.cpu().numpy()
+# in_pred = in_pred.cpu().numpy()
 print("ood")
 out_pred, out_actual = evaluate_ood(cnn_baseline, testloader_ood)
-out_pred = out_pred.cpu().numpy()
+# out_pred = out_pred.cpu().numpy()
+print('in dist pred samples len',len(in_pred))
+print('ood pred samples len',len(out_pred))
 print("--------------------------------------------------------")
 print(in_actual,out_actual)
 
