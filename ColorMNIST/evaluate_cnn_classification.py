@@ -226,8 +226,6 @@ color_mnist_train = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/
 color_mnist_train_intervened = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/intervened_train_0.25/'
 
 
-batch_size = 64
-
 composed_transforms = transforms.Compose([
                         transforms.Resize(32), 
                         transforms.ToTensor(), 
@@ -239,21 +237,23 @@ test_set_spurious_ood = datasets.ImageFolder(color_mnist_test_spurious_ood, comp
 # confound_test_set = datasets.ImageFolder(color_mnist_confound_test, composed_transforms)
 color_mnist_train_set = datasets.ImageFolder(color_mnist_train, composed_transforms)
 color_mnist_train_intervened_set = datasets.ImageFolder(color_mnist_train_intervened, composed_transforms)
+color_mnist_combined_set = ConcatDataset(color_mnist_train_set, color_mnist_train_intervened_set)
 
-
-testloader_indist = torch.utils.data.DataLoader(test_set_indist, batch_size=batch_size, shuffle=True)
-testloader_ood = torch.utils.data.DataLoader(test_set_ood, batch_size=batch_size, shuffle=True)
-testloader_spurious_ood = torch.utils.data.DataLoader(test_set_spurious_ood, batch_size=batch_size, shuffle=True)
+testloader_indist = torch.utils.data.DataLoader(test_set_indist, batch_size=BATCH_SIZE, shuffle=True)
+testloader_ood = torch.utils.data.DataLoader(test_set_ood, batch_size=BATCH_SIZE, shuffle=True)
+testloader_spurious_ood = torch.utils.data.DataLoader(test_set_spurious_ood, batch_size=BATCH_SIZE, shuffle=True)
 # confound_testloader = torch.utils.data.DataLoader(color_mnist_confound_test, batch_size=batch_size, shuffle=True)
 
 color_mnist_trainloader = torch.utils.data.DataLoader(
                                                         color_mnist_train_set, 
-                                                        batch_size=batch_size, shuffle=True)
+                                                        batch_size=BATCH_SIZE, shuffle=True)
 
 intervened_trainloader = torch.utils.data.DataLoader(
                                                         color_mnist_train_intervened_set, 
-                                                        batch_size=batch_size, shuffle=True)
-
+                                                        batch_size=BATCH_SIZE, shuffle=True)
+combined_trainloader = torch.utils.data.DataLoader(
+                                                        color_mnist_combined_set, 
+                                                        batch_size=BATCH_SIZE, shuffle=True)
 
 print('train baseline')
 cnn_baseline = CNN()
@@ -268,7 +268,7 @@ fit(cnn_intervened, intervened_trainloader)
 print('train augment')
 cnn_augment = CNN()
 cnn_augment = cnn_augment.cuda()
-fit_augment()
+fit_augment(cnn_augment, combined_trainloader)
 
 print("baseline")
 #print("in-distribution")
@@ -292,4 +292,15 @@ utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
 print("-----------------")
 print("SPURIOUS OOD")
 sp_out_pred, _ = evaluate_ood(cnn_intervened, testloader_spurious_ood)
+utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
+
+print("augment")
+in_pred, in_actual = evaluate(cnn_augment, testloader_indist)
+out_pred, out_actual = evaluate_ood(cnn_augment, testloader_ood)
+# print("spurious ood")
+# evaluate(cnn_intervened, testloader_spurious_ood)
+utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
+print("-----------------")
+print("SPURIOUS OOD")
+sp_out_pred, _ = evaluate_ood(cnn_augment, testloader_spurious_ood)
 utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
