@@ -35,7 +35,6 @@ def fpr_and_fdr_at_recall(y_true, y_score, recall_level=recall_level_default, po
 
     # make y_true a boolean vector
     y_true = (y_true == pos_label)
-
     # sort scores and corresponding truth values
     desc_score_indices = np.argsort(y_score, kind="mergesort")[::-1]
     y_score = y_score[desc_score_indices]
