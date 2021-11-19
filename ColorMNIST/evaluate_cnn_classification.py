@@ -16,6 +16,9 @@ import torch
 from tqdm import tqdm
 
 import utils
+import random
+
+import matplotlib.pyplot as plt
 
 img_shape = (3, 32, 32)
 
@@ -65,7 +68,7 @@ def fit(model, train_loader):
     for epoch in tqdm(range(EPOCHS)):
         correct = 0
         for batch_idx, (imgs, labels) in enumerate(train_loader):
-    
+            # print('IMG', imgs.shape)
             var_X_batch = Variable(imgs.type(FloatTensor))
             var_y_batch = Variable(labels.type(LongTensor))
             optimizer.zero_grad()
@@ -153,7 +156,7 @@ def evaluate(model, test_loader):
             acc1 = accuracy(softmax_output, test_labels)
             top1 += acc1[0]
     print("In distribution test accuracy top1:{:.3f}% ".format( float(top1*100) / (len(test_loader)*BATCH_SIZE)))
-    return np.asarray(outputs), test_labels
+    return np.asarray(outputs), float(top1*100) / (len(test_loader)*BATCH_SIZE)
 
 def evaluate_ood(model, test_loader):
     model.eval()
@@ -192,31 +195,42 @@ def evaluate_ood(model, test_loader):
     # print("Test accuracy top1:{:.3f}% ".format( float(top1*100) / (len(test_loader)*BATCH_SIZE)))
     return np.asarray(outputs),test_labels
 
-class ConcatDataset(torch.utils.data.Dataset):
-    def __init__(self, *datasets):
-        self.datasets = datasets
+# class ConcatDataset(torch.utils.data.Dataset):
+#     def __init__(self, *datasets):
+#         self.datasets = datasets
 
-    def __getitem__(self, i):
-        return tuple(d[i] for d in self.datasets)
+#     def __getitem__(self, i):
+#         return tuple(d[i] for d in self.datasets)
 
-    def __len__(self):
-        return min(len(d) for d in self.datasets)
+#     def __len__(self):
+#         return min(len(d) for d in self.datasets)
 
 
-class RationDataset(torch.utils.data.Dataset):
-    def __init__(self, *datasets, ratio=0.5):
-        # self.datasets = datasets
-        self.ratio = ratio #
-        self.original_dataset = datasets[0]
-        self.intervened_dataset = datasets[1]
+def plot_in_dist(in_dist):
+    plt.plot(ORIG_INTERV_RATIOs,in_dist)
+    plt.xlabel("original : intervened data ratio")
+    plt.ylabel("in-distribution accuracy")
+    plt.title("In-distribution performance")
+    plt.savefig("in_dist.png")
+    plt.close()
 
-    def __getitem__(self, i):
-        return tuple(d[i] for d in self.datasets)
+def plot_ood_results(ood,spurious,metric):
+    metric_ood = [obj[metric] for obj in ood]
+    metric_spurious = [obj[metric] for obj in spurious]
+    plt.plot(ORIG_INTERV_RATIOs,metric_ood, label="OOD")
+    plt.plot(ORIG_INTERV_RATIOs,metric_spurious, label="Spurious OOD")
+    plt.xlabel("original : intervened data ratio")
+    plt.ylabel(metric)
+    plt.legend()
+    plt.title(f"{metric} comparison")
+    plt.savefig(f"{metric}.png")
+    plt.close()
 
-    def __len__(self):
-        return min(len(d) for d in self.datasets)
-        
-
+def plot_results(in_dist, ood, spurious):
+    plot_in_dist(in_dist)
+    plot_ood_results(ood, spurious, 'auroc')
+    plot_ood_results(ood, spurious, 'aupr')
+    plot_ood_results(ood, spurious, 'fpr')
 
 
 color_mnist_test_indist = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/test_0.25/in_dist/'
@@ -239,11 +253,22 @@ test_set_spurious_ood = datasets.ImageFolder(color_mnist_test_spurious_ood, comp
 color_mnist_train_set = datasets.ImageFolder(color_mnist_train, composed_transforms)
 color_mnist_train_intervened_set = datasets.ImageFolder(color_mnist_train_intervened, composed_transforms)
 
-print(color_mnist_train_set)
-print(color_mnist_train_set[:100])
-exit()
 
-color_mnist_combined_set = RationDataset(color_mnist_train_set, color_mnist_train_intervened_set)
+
+ORIG_INTERV_RATIOs = np.linspace(0.1,1,20) #how much original data : intervened data
+print(ORIG_INTERV_RATIOs)
+ablation_loaders = []
+for ratio in ORIG_INTERV_RATIOs:
+    split_n = int(ratio * len(color_mnist_train_set))
+    orig_random_indices = np.random.choice(np.linspace(0, len(color_mnist_train_set), len(color_mnist_train_set)-1, endpoint=False, dtype=int), split_n)
+    interv_random_indices = np.random.choice(np.linspace(0, len(color_mnist_train_intervened_set), len(color_mnist_train_intervened_set)-1, endpoint=False, dtype=int), len(color_mnist_train_set)-split_n)
+    orig_subset = torch.utils.data.Subset(color_mnist_train_set, orig_random_indices)
+    intervened_subset = torch.utils.data.Subset(color_mnist_train_intervened_set, interv_random_indices)
+    color_mnist_combined_set = torch.utils.data.ConcatDataset([orig_subset, intervened_subset])
+    combined_trainloader = torch.utils.data.DataLoader(
+                                                        color_mnist_combined_set, 
+                                                        batch_size=BATCH_SIZE, shuffle=True)
+    ablation_loaders.append(combined_trainloader)
 
 testloader_indist = torch.utils.data.DataLoader(test_set_indist, batch_size=BATCH_SIZE, shuffle=True)
 testloader_ood = torch.utils.data.DataLoader(test_set_ood, batch_size=BATCH_SIZE, shuffle=True)
@@ -265,39 +290,65 @@ cnn_baseline = CNN()
 cnn_baseline = cnn_baseline.cuda()
 fit(cnn_baseline, color_mnist_trainloader)
 
-print('train intervened')
-cnn_intervened = CNN()
-cnn_intervened = cnn_intervened.cuda()
-fit(cnn_intervened, intervened_trainloader)
+# print('train intervened')
+# cnn_intervened = CNN()
+# cnn_intervened = cnn_intervened.cuda()
+# fit(cnn_intervened, intervened_trainloader)
 
-print('train augment')
-cnn_augment = CNN()
-cnn_augment = cnn_augment.cuda()
-fit_augment(cnn_augment, combined_trainloader)
+print("training ablation models")
+ablation_models = []
+for loader in ablation_loaders:
+    cnn_augment = CNN()
+    cnn_augment = cnn_augment.cuda()
+    fit(cnn_augment, loader)
+    ablation_models.append(cnn_augment)
 
-print("baseline")
+print("BASELINE")
 in_pred, _ = evaluate(cnn_baseline, testloader_indist)
 print("OOD")
 out_pred, _ = evaluate_ood(cnn_baseline, testloader_ood)
 utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
+print("------------------------")
 print("SPURIOUS OOD")
 sp_out_pred, _ = evaluate_ood(cnn_baseline, testloader_spurious_ood)
 utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
 
-print("intervened")
-in_pred, in_actual = evaluate(cnn_intervened, testloader_indist)
-print("OOD")
-out_pred, out_actual = evaluate_ood(cnn_intervened, testloader_ood)
-utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
-print("SPURIOUS OOD")
-sp_out_pred, _ = evaluate_ood(cnn_intervened, testloader_spurious_ood)
-utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
+# print("######################")
+# print("intervened")
+# in_pred, in_actual = evaluate(cnn_intervened, testloader_indist)
+# print("OOD")
+# out_pred, out_actual = evaluate_ood(cnn_intervened, testloader_ood)
+# utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
+# print("------------------------")
+# print("SPURIOUS OOD")
+# sp_out_pred, _ = evaluate_ood(cnn_intervened, testloader_spurious_ood)
+# utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
 
-print("augment")
-in_pred, in_actual = evaluate(cnn_augment, testloader_indist)
-print("OOD")
-out_pred, out_actual = evaluate_ood(cnn_augment, testloader_ood)
-utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
-print("SPURIOUS OOD")
-sp_out_pred, _ = evaluate_ood(cnn_augment, testloader_spurious_ood)
-utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
+print("######################")
+print("ABLATION")
+ood_results = []
+spurious_ood_results = []
+in_dist_results = []
+for i, model in enumerate(ablation_models):
+    print(f"orig:intervene ratio: {ORIG_INTERV_RATIOs[i]}")
+    in_pred, in_accuracy = evaluate(model, testloader_indist)
+    in_dist_results.append(in_accuracy)
+    print("OOD")
+    out_pred, out_actual = evaluate_ood(model, testloader_ood)
+    ood_auroc, ood_aupr, ood_fpr = utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
+    ood_results.append({
+        'auroc': ood_auroc,
+        'aupr': ood_aupr,
+        'fpr': ood_fpr
+    })
+    print("------------------------")
+    print("SPURIOUS OOD")
+    sp_out_pred, _ = evaluate_ood(model, testloader_spurious_ood)
+    spur_auroc, spur_aupr, spur_fpr = utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
+    spurious_ood_results.append({
+        'auroc': spur_auroc,
+        'aupr': spur_aupr,
+        'fpr': spur_fpr
+    })
+
+plot_results(in_dist_results, ood_results, spurious_ood_results)

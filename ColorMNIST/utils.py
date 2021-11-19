@@ -76,7 +76,7 @@ def get_measures(_pos, _neg, recall_level=recall_level_default):
 
 
 def print_measures(auroc, aupr, fpr, ood, method, recall_level=recall_level_default):
-    print('\t\t\t' + ood+'_'+method)
+    # print('\t\t\t' + ood+'_'+method)
     print('FPR{:d}:\t\t\t{:.2f}'.format(int(100 * recall_level), 100 * fpr))
     print('AUROC: \t\t\t{:.2f}'.format(100 * auroc))
     print('AUPR:  \t\t\t{:.2f}'.format(100 * aupr))
