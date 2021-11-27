@@ -1,9 +1,8 @@
-os.environ["CUDA_VISIBLE_DEVICES"]="7"
-
 import argparse
 import numpy as np
 import math
 
+import torchvision
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
 
@@ -19,6 +18,8 @@ import shutil
 from PIL import Image
 from tqdm import trange
 from types import SimpleNamespace
+
+import os
 
 trainloader = torch.utils.data.DataLoader(
         datasets.MNIST(
@@ -53,7 +54,7 @@ testloader = torch.utils.data.DataLoader(
     )
 
 # Directory where dataset for IRM will be saved:
-color_mnist_path = '/proj/vondrick/datasets/color_MNIST/irm_mnist/'
+color_mnist_path = '/nobackup/dyah_roopa/IRM/train'
 
 
 for i in range(10):
@@ -135,7 +136,7 @@ for batch_idx, (imgs, labels) in enumerate((trainloader)):
 
 # Test path
 
-color_mnist_test_path = '/proj/vondrick/datasets/color_MNIST/irm_mnist_test/'
+color_mnist_test_path = '/nobackup/dyah_roopa/IRM/test'
 
 for i in range(10):
     os.makedirs(color_mnist_test_path+str(i), exist_ok=True)
@@ -153,4 +154,4 @@ for batch_idx, (test_imgs, test_labels) in enumerate(testloader):
         for i in range(test_imgs[test_labels==digit].size(0)):
             torchvision.utils.save_image(test_imgs[test_labels==digit][i, :, :, :], 
                                          color_mnist_test_path+str(digit)+'/{}.png'.format(batch_idx*128+i), 
-                                         normalize=True
+                                         normalize=True)                                         

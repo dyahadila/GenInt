@@ -28,26 +28,28 @@ for k,v in sorted(vars(flags).items()):
     print("\t{}: {}".format(k, v))
 
 # Define paths for our datasets
-if 'cv' in socket.gethostname():
+#if 'cv' in socket.gethostname():
     # path_color_mnist_test2 = '/proj/vondrick/datasets/color_MNIST/test2/' #Same 
     # path_color_mnist_train = '/proj/vondrick/datasets/color_MNIST/train/'
 
-    path_irm_mnist = '/proj/vondrick/datasets/color_MNIST/irm_mnist/'
+#path_irm_mnist = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/train_irm/'
+path_irm_mnist = '/nobackup/dyah_roopa/IRM/train/'
     # path_irm_mnist_test = '/proj/vondrick/datasets/color_MNIST/irm_mnist_test/'
     # path_irm_mnist_test = '/proj/vondrick/datasets/color_MNIST/irm_test_same_d/'
-    path_irm_mnist_test = '/proj/vondrick/datasets/color_MNIST/test2/' #Same
+path_irm_mnist_test = '/nobackup/dyah_roopa/IRM/test/' #Same
+#path_irm_mnist_test = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/test_0.25/in_dist/'
 
-elif 'hulk' in socket.gethostname():
+""" elif 'hulk' in socket.gethostname():
     # path_color_mnist_test = '/local/rcs/ag4202/color_MNIST/test/'
     # path_color_mnist_test2 = '/local/rcs/ag4202/color_MNIST/test2/' #Same 
     # path_color_mnist_train = '/local/rcs/ag4202/color_MNIST/train/'
 
-    path_irm_mnist = '/local/rcs/ag4202/color_MNIST/irm_mnist/'
+    path_irm_mnist = '/nobackup/dyah_roopa/IRM/'
     # path_irm_mnist_test = '/local/rcs/ag4202/color_MNIST/irm_test_same_d/'
     # path_irm_mnist_test = '/local/rcs/ag4202/color_MNIST/test2/' #Same
-    path_irm_mnist_test = '/local/rcs/ag4202/color_MNIST/irm_mnist_test/'
-    path_irm_mnist_test_diff = '/local/rcs/ag4202/color_MNIST/irm_mnist_test/'
-    path_irm_mnist_test_same = '/local/rcs/ag4202/color_MNIST/test2/' #Same
+    path_irm_mnist_test = '/nobackup/dyah_roopa/IRM/test/'
+    path_irm_mnist_test_diff = '/nobackup/dyah_roopa/IRM/test/'
+    path_irm_mnist_test_same = '/nobackup/dyah_roopa/IRM/test2/' #Same """
      
 load = False
 
@@ -66,6 +68,7 @@ def loadIRMMnistTrainEnvironments(path_irm_mnist_folder):
         path_env = os.path.join(path_irm_mnist_folder, env_folder_name)
 
         list_digit_folders = os.listdir(path_env)
+        #print(list_digit_folders)
         
         list_num_images = []
         list_digit_image_arrays = []
@@ -87,7 +90,7 @@ def loadIRMMnistTrainEnvironments(path_irm_mnist_folder):
         
         num_images_per_digit = min(list_num_images)
         final_list_digits_arrays = [l[:num_images_per_digit] for l in list_digit_image_arrays]
-        labels = torch.Tensor([num_images_per_digit*[i] for i in range(1,11)]) 
+        labels = torch.Tensor([num_images_per_digit*[i] for i in range(0,10)]) 
         tensor_labels = labels.view(-1,1) 
         tensor_labels = tensor_labels.to(torch.long)
         
@@ -101,13 +104,12 @@ def loadIRMMnistTrainEnvironments(path_irm_mnist_folder):
                 }
 
         envs.append(env)
-    
+        
     return envs
 
 def loadIRMMnistTestEnvironment(path_irm_mnist_folder):
 
     list_digit_folders = os.listdir(path_irm_mnist_folder)
-    
     list_num_images = []
     list_digit_image_arrays = []
     for digit_fol in tqdm.tqdm(list_digit_folders):
@@ -128,7 +130,7 @@ def loadIRMMnistTestEnvironment(path_irm_mnist_folder):
     
     num_images_per_digit = min(list_num_images)
     final_list_digits_arrays = [l[:num_images_per_digit] for l in list_digit_image_arrays]
-    labels = torch.Tensor([num_images_per_digit*[i] for i in range(1,11)]) 
+    labels = torch.Tensor([num_images_per_digit*[i] for i in range(0,10)]) 
     tensor_labels = labels.view(-1,1) 
     tensor_labels = tensor_labels.to(torch.long)
     
@@ -187,6 +189,7 @@ for restart in range(flags.n_restarts):
             self.fc1 = nn.Linear(1024, 256)
             self.fc2 = nn.Linear(256, 10)
 
+
         def forward(self, x):
             # print("forward pass", x.shape)
             x = F.relu(self.conv1(x))
@@ -194,16 +197,15 @@ for restart in range(flags.n_restarts):
             x = F.dropout(x, p=0.5, training=self.training)
             x = F.relu(F.max_pool2d(self.conv3(x),2))
             x = F.dropout(x, p=0.5, training=self.training)
+            print(x)
+            print(x.shape)
             x = x.reshape(-1,1024 )
-            # x = x.view(-1,1024 )
+            #x = x.view(-1,1024 )
             x = F.relu(self.fc1(x))
             x = F.dropout(x, training=self.training)
             x = self.fc2(x)
             return x
             # return F.log_softmax(x, dim=1)
- 
-
-
 
     mlp = CNN().cuda()
 
@@ -228,6 +230,7 @@ for restart in range(flags.n_restarts):
         ps = torch.exp(logps)
         top_p, top_idx = torch.topk(logps,k = 1, dim=1)
         preds = top_idx
+        breakpoint()
         num_correct = torch.sum((y==preds)).to(torch.float)
         num_dp = y.shape[0]
         acc = num_correct/num_dp
@@ -254,8 +257,8 @@ for restart in range(flags.n_restarts):
 
     for step in range(flags.steps):
         for env in envs:
-            logits = mlp(env['images'][:15000].cuda())
-            labels = env['labels'][:15000].cuda()
+            logits = mlp(env['images'][:64].cuda())
+            labels = env['labels'][:64].cuda()
             env['nll'] = mnist_loss(logits, labels)
             env['acc'] = mnist_acc(logits,labels)
             env['penalty'] = mnist_penalty(logits, labels)
