@@ -211,7 +211,7 @@ def plot_in_dist(in_dist):
     plt.xlabel("original : intervened data ratio")
     plt.ylabel("in-distribution accuracy")
     plt.title("In-distribution performance")
-    plt.savefig("in_dist.png")
+    plt.savefig(os.path.join("in_dist.png"))
     plt.close()
 
 def plot_ood_results(ood,spurious,metric):
@@ -223,7 +223,7 @@ def plot_ood_results(ood,spurious,metric):
     plt.ylabel(metric)
     plt.legend()
     plt.title(f"{metric} comparison")
-    plt.savefig(f"{metric}.png")
+    plt.savefig(os.path.join(results_dir,f"{metric}.png"))
     plt.close()
 
 def plot_results(in_dist, ood, spurious):
@@ -232,14 +232,18 @@ def plot_results(in_dist, ood, spurious):
     plot_ood_results(ood, spurious, 'aupr')
     plot_ood_results(ood, spurious, 'fpr')
 
+r = 0.9
+results_dir = f"results/r_{r}"
+if not os.path.isdir(results_dir):
+    os.mkdir(results_dir)
 
-color_mnist_test_indist = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/test_0.25/in_dist/'
-color_mnist_test_ood = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/test_0.25/ood/'
-color_mnist_test_spurious_ood = '/nobackup/dyah_roopa/temp/Spurious_OOD/datasets/ood_datasets/partial_color_mnist_0&1/'
+color_mnist_test_indist = f'/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/test_{r}/in_dist/'
+color_mnist_test_ood = f'/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/test_{r}/ood/'
+color_mnist_test_spurious_ood = f'/nobackup/dyah_roopa/temp/Spurious_OOD/datasets/ood_datasets/partial_color_mnist_0&1/'
 
 # color_mnist_confound_test = '/nobackup/dyah_roopa/color_MNIST/confound_test/'
-color_mnist_train = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/train_0.25/'
-color_mnist_train_intervened = '/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/intervened_train_0.25/'
+color_mnist_train = f'/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/train_{r}/'
+color_mnist_train_intervened = f'/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/intervened_train_{r}/'
 
 
 composed_transforms = transforms.Compose([
