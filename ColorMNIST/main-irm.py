@@ -230,7 +230,6 @@ for restart in range(flags.n_restarts):
         ps = torch.exp(logps)
         top_p, top_idx = torch.topk(logps,k = 1, dim=1)
         preds = top_idx
-        breakpoint()
         num_correct = torch.sum((y==preds)).to(torch.float)
         num_dp = y.shape[0]
         acc = num_correct/num_dp
@@ -256,9 +255,11 @@ for restart in range(flags.n_restarts):
     pretty_print('step', 'train nll', 'train acc', 'train penalty', 'test acc')
 
     for step in range(flags.steps):
+        print('STEP', step)
         for env in envs:
             logits = mlp(env['images'][:64].cuda())
             labels = env['labels'][:64].cuda()
+            print('shape', logits.shape)
             env['nll'] = mnist_loss(logits, labels)
             env['acc'] = mnist_acc(logits,labels)
             env['penalty'] = mnist_penalty(logits, labels)

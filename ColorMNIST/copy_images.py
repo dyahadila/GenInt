@@ -1,8 +1,9 @@
 import os
 import shutil
 import pandas as pd
+import constants
 
-r = 0.9
+r = constants.r
 train_file = f"/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/r_{r}/train.csv"
 test_file = f"/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/r_{r}/test.csv"
 

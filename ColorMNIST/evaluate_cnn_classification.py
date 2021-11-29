@@ -19,6 +19,7 @@ import utils
 import random
 
 import matplotlib.pyplot as plt
+import constants
 
 img_shape = (3, 32, 32)
 
@@ -211,7 +212,7 @@ def plot_in_dist(in_dist):
     plt.xlabel("original : intervened data ratio")
     plt.ylabel("in-distribution accuracy")
     plt.title("In-distribution performance")
-    plt.savefig(os.path.join("in_dist.png"))
+    plt.savefig(os.path.join(results_dir,"in_dist.png"))
     plt.close()
 
 def plot_ood_results(ood,spurious,metric):
@@ -232,7 +233,8 @@ def plot_results(in_dist, ood, spurious):
     plot_ood_results(ood, spurious, 'aupr')
     plot_ood_results(ood, spurious, 'fpr')
 
-r = 0.9
+
+r = constants.r
 results_dir = f"results/r_{r}"
 if not os.path.isdir(results_dir):
     os.mkdir(results_dir)
@@ -259,8 +261,7 @@ color_mnist_train_intervened_set = datasets.ImageFolder(color_mnist_train_interv
 
 
 
-ORIG_INTERV_RATIOs = np.linspace(0.1,1,20) #how much original data : intervened data
-print(ORIG_INTERV_RATIOs)
+ORIG_INTERV_RATIOs = np.linspace(0,1,20) #how much original data : intervened data
 ablation_loaders = []
 for ratio in ORIG_INTERV_RATIOs:
     split_n = int(ratio * len(color_mnist_train_set))
@@ -289,10 +290,10 @@ combined_trainloader = torch.utils.data.DataLoader(
                                                         color_mnist_combined_set, 
                                                         batch_size=BATCH_SIZE, shuffle=True)
 
-print('train baseline')
-cnn_baseline = CNN()
-cnn_baseline = cnn_baseline.cuda()
-fit(cnn_baseline, color_mnist_trainloader)
+# print('train baseline')
+# cnn_baseline = CNN()
+# cnn_baseline = cnn_baseline.cuda()
+# fit(cnn_baseline, color_mnist_trainloader)
 
 # print('train intervened')
 # cnn_intervened = CNN()
@@ -307,15 +308,15 @@ for loader in ablation_loaders:
     fit(cnn_augment, loader)
     ablation_models.append(cnn_augment)
 
-print("BASELINE")
-in_pred, _ = evaluate(cnn_baseline, testloader_indist)
-print("OOD")
-out_pred, _ = evaluate_ood(cnn_baseline, testloader_ood)
-utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
-print("------------------------")
-print("SPURIOUS OOD")
-sp_out_pred, _ = evaluate_ood(cnn_baseline, testloader_spurious_ood)
-utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
+# print("BASELINE")
+# in_pred, _ = evaluate(cnn_baseline, testloader_indist)
+# print("OOD")
+# out_pred, _ = evaluate_ood(cnn_baseline, testloader_ood)
+# utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
+# print("------------------------")
+# print("SPURIOUS OOD")
+# sp_out_pred, _ = evaluate_ood(cnn_baseline, testloader_spurious_ood)
+# utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
 
 # print("######################")
 # print("intervened")

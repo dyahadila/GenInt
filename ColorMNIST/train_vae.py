@@ -9,6 +9,7 @@ from torchvision.utils import save_image
 from tqdm import tqdm
 
 import os
+import constants
 
 log_interval = 10
 epochs = 50
@@ -19,7 +20,8 @@ torch.manual_seed(1)
 
 device = torch.device("cuda")
 
-r = 0.9
+
+r = constants.r
 train_path= f'/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/train_{r}/'
 # train_path='/nobackup/dyah_roopa/color_MNIST/train/'
 test_path= '/nobackup/dyah_roopa/color_MNIST/test/'
@@ -27,7 +29,6 @@ test_path= '/nobackup/dyah_roopa/color_MNIST/test/'
 composed_transforms = transforms.Compose([
                 transforms.ToTensor(),
             ])
-
 train_dataset = datasets.ImageFolder(
     train_path, composed_transforms
             )
