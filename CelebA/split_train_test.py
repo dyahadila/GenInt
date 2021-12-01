@@ -13,12 +13,19 @@ ood = {'file': [], 'label': []}
 df_data = pd.read_csv(os.path.join(celebA_dir, "celebA_split.csv"))
 
 images_train = [f_ for f_ in os.listdir(os.path.join(celebA_dir, "train_sq")) if '.png' in f_]
+images_val = [f_ for f_ in os.listdir(os.path.join(celebA_dir, "val_sq")) if '.png' in f_]
 images_indist_test = [f_ for f_ in os.listdir(os.path.join(celebA_dir, "indist_test_sq")) if '.png' in f_]
 # images = images_train + images_indist_test
 for i, file_ in enumerate(images_train):
     image_id = file_.split("_")[-1][:-4] + ".jpg"
     label = df_data.loc[df_data["image_id"] == image_id]["Gray_Hair"].iloc[0]
     train['file'].append(os.path.join(celebA_dir, "train_sq", file_))
+    train['label'].append(label)
+
+for i, file_ in enumerate(images_val):
+    image_id = file_.split("_")[-1][:-4] + ".jpg"
+    label = df_data.loc[df_data["image_id"] == image_id]["Gray_Hair"].iloc[0]
+    train['file'].append(os.path.join(celebA_dir, "val_sq", file_))
     train['label'].append(label)
 
 for i, file_ in enumerate(images_indist_test):

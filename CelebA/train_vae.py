@@ -13,7 +13,7 @@ import constants
 
 log_interval = 10
 epochs = 50
-batch_size = 132
+batch_size = 32
 cuda = torch.cuda.is_available()
 workers=10
 torch.manual_seed(1)
@@ -43,7 +43,7 @@ train_loader = torch.utils.data.DataLoader(
 #         test_dataset, batch_size=batch_size, shuffle=None,
 #         num_workers=workers, pin_memory=True, sampler=None)
 
-in_dim =32**2 *3
+in_dim =100**2 *3
 emb_dim=5
 hidden_dim=1000
 z_hidden = 2
@@ -101,9 +101,12 @@ def train(epoch):
     train_loss = 0
     for batch_idx, (data, target) in enumerate(tqdm(train_loader)):
         data = data.to(device)
+        # print(data)
         target = target.to(device)
+        # print(target)
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data, target)
+        # print(recon_batch)
         loss = loss_function(recon_batch, data, mu, logvar)
         loss.backward()
         train_loss += loss.item()
@@ -175,7 +178,7 @@ for digit in range(2):
 
         # sample = torch.randn(64, 20).to(device)
         # sample = model.decode(sample).cpu()
-        sample = sample.view(vis_width**2, 3, 32, 32)
+        sample = sample.view(vis_width**2, 3, 100, 100)
 
         for i in range(sample.size(0)):
             save_image(sample[i, :, :, :],
