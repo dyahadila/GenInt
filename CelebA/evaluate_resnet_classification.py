@@ -232,7 +232,7 @@ color_mnist_train_intervened_set = datasets.ImageFolder(train_intervened, compos
 
 
 
-ORIG_INTERV_RATIOs = np.linspace(0,1,2) #how much original data : intervened data
+ORIG_INTERV_RATIOs = np.linspace(0,1,10) #how much original data : intervened data
 ablation_loaders = []
 for ratio in ORIG_INTERV_RATIOs:
     split_n = int(ratio * len(color_mnist_train_set))
@@ -261,15 +261,15 @@ combined_trainloader = torch.utils.data.DataLoader(
                                                         color_mnist_combined_set, 
                                                         batch_size=BATCH_SIZE, shuffle=True)
 
-print('train baseline')
-cnn_baseline = ResNet()
-cnn_baseline = cnn_baseline.create_model().cuda()
-fit(cnn_baseline, color_mnist_trainloader)
+# print('train baseline')
+# cnn_baseline = ResNet()
+# cnn_baseline = cnn_baseline.create_model().cuda()
+# fit(cnn_baseline, color_mnist_trainloader)
 
-print('train intervened')
-cnn_intervened = ResNet()
-cnn_intervened = cnn_intervened.create_model().cuda()
-fit(cnn_intervened, intervened_trainloader)
+# print('train intervened')
+# cnn_intervened = ResNet()
+# cnn_intervened = cnn_intervened.create_model().cuda()
+# fit(cnn_intervened, intervened_trainloader)
 
 print("training ablation models")
 ablation_models = []
@@ -279,26 +279,26 @@ for loader in ablation_loaders:
     fit(cnn_augment, loader)
     ablation_models.append(cnn_augment) 
 
-print("BASELINE")
-in_pred, _ = evaluate(cnn_baseline, testloader_indist)
-print("OOD")
-out_pred, _ = evaluate_ood(cnn_baseline, testloader_ood)
-utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
-print("------------------------")
-print("SPURIOUS OOD")
-sp_out_pred, _ = evaluate_ood(cnn_baseline, testloader_spurious_ood)
-utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
+# print("BASELINE")
+# in_pred, _ = evaluate(cnn_baseline, testloader_indist)
+# # print("OOD")
+# # out_pred, _ = evaluate_ood(cnn_baseline, testloader_ood)
+# # utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
+# print("------------------------")
+# print("SPURIOUS OOD")
+# sp_out_pred, _ = evaluate_ood(cnn_baseline, testloader_spurious_ood)
+# utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
 
-print("######################")
-print("intervened")
-in_pred, in_actual = evaluate(cnn_intervened, testloader_indist)
-print("OOD")
-out_pred, out_actual = evaluate_ood(cnn_intervened, testloader_ood)
-utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
-print("------------------------")
-print("SPURIOUS OOD")
-sp_out_pred, _ = evaluate_ood(cnn_intervened, testloader_spurious_ood)
-utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
+# print("######################")
+# print("intervened")
+# in_pred, in_actual = evaluate(cnn_intervened, testloader_indist)
+# # print("OOD")
+# # # out_pred, out_actual = evaluate_ood(cnn_intervened, testloader_ood)
+# # utils.get_and_print_results(in_pred,out_pred,"dummy_ood","dummy_method")
+# print("------------------------")
+# print("SPURIOUS OOD")
+# sp_out_pred, _ = evaluate_ood(cnn_intervened, testloader_spurious_ood)
+# utils.get_and_print_results(in_pred,sp_out_pred,"dummy_ood","dummy_method")
 
 print("######################")
 print("ABLATION")

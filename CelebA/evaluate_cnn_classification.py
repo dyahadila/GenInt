@@ -193,7 +193,7 @@ if not os.path.isdir(results_dir):
     os.mkdir(results_dir)
 
 test_indist = f'/nobackup/dyah_roopa/CelebA/test_{r}/in_dist/'
-test_ood = '/nobackup/dyah_roopa/temp/Spurious_OOD/datasets/ood_datasets/LSUN_resize/'
+test_ood = '/nobackup/dyah_roopa/temp/Spurious_OOD/datasets/ood_datasets/CUB_square/'
 spurious_ood = f'/nobackup/dyah_roopa/CelebA/test_{r}/spurious_ood/'
 
 train = f'/nobackup/dyah_roopa/CelebA/train_{r}/'
@@ -213,7 +213,7 @@ color_mnist_train_intervened_set = datasets.ImageFolder(train_intervened, compos
 
 
 
-ORIG_INTERV_RATIOs = np.linspace(0,1,2) #how much original data : intervened data
+ORIG_INTERV_RATIOs = np.linspace(0,1,10) #how much original data : intervened data
 ablation_loaders = []
 for ratio in ORIG_INTERV_RATIOs:
     split_n = int(ratio * len(color_mnist_train_set))
