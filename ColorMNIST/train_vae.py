@@ -24,7 +24,7 @@ device = torch.device("cuda")
 r = constants.r
 train_path= f'/nobackup/dyah_roopa/VAE_ColorMNIST_original/color_MNIST_1/train_{r}/'
 # train_path='/nobackup/dyah_roopa/color_MNIST/train/'
-test_path= '/nobackup/dyah_roopa/color_MNIST/test/'
+#test_path= '/nobackup/dyah_roopa/color_MNIST/test/'
 
 composed_transforms = transforms.Compose([
                 transforms.ToTensor(),
@@ -36,12 +36,12 @@ train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=batch_size, shuffle=True,
         num_workers=workers, pin_memory=True, sampler=None)
 
-test_dataset = datasets.ImageFolder(
+""" test_dataset = datasets.ImageFolder(
     test_path, composed_transforms
-            )
-test_loader = torch.utils.data.DataLoader(
+            ) """
+""" test_loader = torch.utils.data.DataLoader(
         test_dataset, batch_size=batch_size, shuffle=None,
-        num_workers=workers, pin_memory=True, sampler=None)
+        num_workers=workers, pin_memory=True, sampler=None) """
 
 in_dim =28**2 *3
 emb_dim=5
@@ -118,7 +118,7 @@ def train(epoch):
           epoch, train_loss / len(train_loader.dataset)))
 
 
-def test(epoch):
+""" def test(epoch):
     model.eval()
     test_loss = 0
     with torch.no_grad():
@@ -135,7 +135,7 @@ def test(epoch):
                          './' + str(epoch) + '.png', nrow=n)
 
     test_loss /= len(test_loader.dataset)
-    print('====> Test set loss: {:.4f}'.format(test_loss))
+    print('====> Test set loss: {:.4f}'.format(test_loss)) """
 
 
 
